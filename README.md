@@ -1,57 +1,54 @@
-# 🧠 Model-Based Reflex Agent (Prolog)
+# 🎯 Goal-Based Agent (Prolog)
 
 ## 📌 Overview
 
-This project implements a **Model-Based Reflex Agent** using **Prolog**. Unlike a simple reflex agent, this agent maintains an **internal state (model)** of the world, allowing it to make better decisions in environments that are **partially observable**.
+This project implements a **Goal-Based Agent** using **Prolog**. Unlike reflex-based agents, this agent selects actions by **reasoning about future states** and choosing actions that help it **achieve a specific goal**.
 
-The agent is designed to be **integrated with a Python UI**, where the environment sends percepts and receives actions from the Prolog logic.
+The agent is designed to work with a **Python UI**, which visualizes the environment, the agent’s decisions, and goal progression.
 
 ---
 
-## 🤖 What Is a Model-Based Reflex Agent?
+## 🤖 What Is a Goal-Based Agent?
 
-A Model-Based Reflex Agent:
+A Goal-Based Agent:
 
-* Reacts to the **current percept**
-* Maintains an **internal model** of the environment
-* Updates its state using percept history
-* Chooses actions based on the **current internal state**, not just raw percepts
+* Has a **clearly defined goal**
+* Considers the **current state of the environment**
+* Chooses actions that move it **closer to the goal**
+* May evaluate multiple possible actions before deciding
 
-In simple terms: the agent *remembers what it has seen before*.
+In simple terms: the agent *acts with intention*.
 
 ---
 
 ## 🧠 Agent Logic Flow
 
 ```
-Percept → Update Internal State → Select Action
+Current State → Possible Actions → Resulting States → Goal Test → Action
 ```
 
-Example:
-
-* The agent perceives part of the environment
-* Updates what it believes the world looks like
-* Uses this belief to decide what to do next
+The agent does not just react; it **plans**.
 
 ---
 
 ## 🌍 Environment Assumptions (Example)
 
-The environment may be:
+The environment may be represented as:
 
-* A room-cleaning world
-* A grid where some locations are not always observable
+* A grid world
+* A room-cleaning environment
+* Any state-space problem with clear goals
 
-### Percept Example
+### State Representation Example
 
 ```prolog
-percept(RoomState, Position).
+state(Position, RoomStatus).
 ```
 
-### Internal State Example
+### Goal Representation Example
 
 ```prolog
-state(RoomStateLeft, RoomStateRight, Position).
+goal(clean).
 ```
 
 ---
@@ -59,18 +56,18 @@ state(RoomStateLeft, RoomStateRight, Position).
 ## 🗂 Project Structure
 
 ```
-model-based-agent/
+goal-based-agent/
 │
 ├── src/
-│   ├── model_agent.pl        # Main agent logic
-│   ├── state_update.pl       # Internal state update rules
-│   └── action_rules.pl       # Action selection rules
+│   ├── goal_agent.pl          # Main agent logic
+│   ├── goal_definition.pl     # Goal representation
+│   └── action_rules.pl        # Actions and transitions
 │
 ├── tests/
-│   └── test_queries.pl       # Sample test cases
+│   └── test_queries.pl        # Sample test cases
 │
 ├── docs/
-│   └── agent_explanation.md  # Theory + design explanation
+│   └── agent_explanation.md   # Theory + design explanation
 │
 └── README.md
 ```
@@ -79,20 +76,20 @@ model-based-agent/
 
 ## ⚙️ Key Components
 
-### 1️⃣ Internal State
+### 1️⃣ Goal Definition
 
-* Represents the agent’s belief about the world
-* Updated whenever a new percept is received
+* Explicit representation of what the agent wants to achieve
+* Used to test whether a state is acceptable
 
-### 2️⃣ State Update Rules
+### 2️⃣ State Evaluation
 
-* Combine previous state with new percepts
-* Handle unknown or partially observable data
+* Determines whether the current state satisfies the goal
+* Implemented using goal-test predicates
 
-### 3️⃣ Action Selection
+### 3️⃣ Action Selection / Planning
 
-* Uses the internal state to determine the next action
-* Implemented as condition–action rules
+* Evaluates possible actions
+* Chooses actions that reduce the distance to the goal
 
 ---
 
@@ -101,24 +98,29 @@ model-based-agent/
 The main predicate exposed for Python integration:
 
 ```prolog
-decide_action(Percept, CurrentState, NewState, Action).
+decide_action(CurrentState, Goal, Action).
 ```
 
-* `Percept`: current sensory input
-* `CurrentState`: agent’s internal model
-* `NewState`: updated internal model
-* `Action`: chosen action
+* `CurrentState`: current environment state
+* `Goal`: desired goal state
+* `Action`: chosen action toward the goal
+
+(Optional advanced version)
+
+```prolog
+plan(CurrentState, Goal, Plan).
+```
 
 ---
 
 ## 🔌 Python Integration Notes
 
-* No printing inside Prolog predicates
-* Output must be clean and deterministic
-* The Python UI will:
+* Prolog must return **one clear action**
+* No console printing inside Prolog logic
+* Python UI will:
 
-  1. Send percept + current state
-  2. Receive action + updated state
+  1. Provide current state and goal
+  2. Receive the next best action
 
 ---
 
@@ -133,22 +135,22 @@ swipl
 Load the agent:
 
 ```prolog
-?- consult('src/model_agent.pl').
+?- consult('src/goal_agent.pl').
 ```
 
 Example test:
 
 ```prolog
-?- decide_action(percept(dirty,left), state(clean,unknown,left), NewState, Action).
+?- decide_action(state(left, dirty), goal(clean), Action).
 ```
 
 ---
 
 ## ✅ Acceptance Criteria
 
-* Agent maintains internal state
-* State updates correctly with percepts
-* Actions depend on state, not just percept
+* Goal is explicitly defined
+* Agent chooses actions based on goal achievement
+* No random or purely reactive behavior
 * Code runs in **SWI-Prolog**
 * Ready for Python UI integration
 
@@ -163,7 +165,6 @@ Chapter 2 – Intelligent Agents
 
 ## 🧭 Final Note
 
-This agent should clearly behave **smarter than a simple reflex agent**. When observed through the UI, its decisions should reflect **memory and awareness of unseen parts of the environment**.
+When observed through the UI, this agent should clearly demonstrate **purposeful behavior**. Every action must make sense **in relation to the goal**.
 
-If it remembers, it qualifies. 🧠✔️
-
+If it plans, it qualifies. 🎯✔️
